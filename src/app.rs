@@ -11,7 +11,7 @@ extern "C" {
 #[function_component(App)]
 pub fn app() -> Html {
     html! {
-		<div style={"display: flex; margin: 0; background-color: red;"}>
+		<div style={"display: flex; margin: 0;"}>
 			<Menu />
 			<main>
 			</main>
