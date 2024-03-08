@@ -17,9 +17,9 @@ pub fn menu() -> Html {
 					</a>
 				</li>
 				<li style={li_style.clone()}>
-					<a href="/about" style={a_style.clone()}>
+					<a href="/preferences" style={a_style.clone()}>
 						<img src="/public/icons/gear.svg" />
-						{"Preference"}
+						{"Preferences"}
 					</a>
 				</li>
 			</ul>
