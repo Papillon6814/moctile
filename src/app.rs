@@ -1,7 +1,9 @@
 use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::components::menu::Menu;
+use crate::components::calendar::Calendar;
+use crate::components::date::Date;
+use crate::components::preferences::Preferences;
 
 #[wasm_bindgen]
 extern "C" {
@@ -19,22 +21,11 @@ enum Route {
 	Preferences,
 }
 
-#[function_component(Calendar)]
-fn calendar() -> Html {
-	html! {
-		<div style={"display: flex; margin: 0;"}>
-			<Menu />
-			<main>
-			</main>
-		</div>
-	}
-}
-
 fn switch(route: &Route) -> Html {
 	match route {
 		Route::Calendar => html! { <Calendar /> },
-		Route::Date => html! { <div>{"Date"}</div> },
-		Route::Preferences => html! { <div>{"Preferences"}</div> },
+		Route::Date => html! { <Date /> },
+		Route::Preferences => html! { <Preferences /> },
 	}
 }
 

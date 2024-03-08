@@ -1,4 +1,4 @@
-use yew::{function_component, Html, html};
+use yew::{function_component, html};
 use crate::constants::colors::SENTENCE_BASE;
 
 #[function_component(Menu)]
