@@ -3,6 +3,7 @@ use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
+use crate::components::menu::Menu;
 
 #[wasm_bindgen]
 extern "C" {
@@ -61,6 +62,7 @@ pub fn app() -> Html {
 
     html! {
         <main class="container">
+			<Menu />
             <div class="row">
                 <a href="https://tauri.app" target="_blank">
                     <img src="public/tauri.svg" class="logo tauri" alt="Tauri logo"/>
