@@ -14,21 +14,14 @@ fn month_view(props: &MonthViewProps) -> Html {
 
 	let first_day_of_month = NaiveDate::from_ymd_opt(*year, *month, 1).unwrap();
 	let first_weekday = first_day_of_month.weekday();
-	let days_in_month = first_day_of_month.with_month(*month + 1).unwrap().pred_opt().unwrap().day();
+	let days_in_month = first_day_of_month.with_month(*month + 1).unwrap().pred_opt().unwrap().day() as i32;
 
 	let mut days: Vec<Html> = Vec::new();
-	let mut day_count = 1;
 
 	let weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-	for _ in 0..first_weekday.num_days_from_sunday() {
-		days.push(html! {<td></td>});
-	}
-
-	while day_count <= days_in_month {
-		days.push(html! {<td>{day_count}</td>});
-		day_count += 1;
-	}
+	let start_padding = first_weekday.num_days_from_sunday() as i32;
+	let total_slots = days_in_month + start_padding;
+	let weeks = (total_slots as f32 / 7.0).ceil() as i32;
 
 	html! {
 		<>
@@ -40,9 +33,24 @@ fn month_view(props: &MonthViewProps) -> Html {
 					</tr>
 				</thead>
 				<tbody>
-					<tr>
-						{for days.into_iter()}
-					</tr>
+				{
+					for (0..weeks).map(|week| {
+						html! {
+							<tr>
+							{
+								for (0..7).map(|weekday| {
+									let day = week * 7 + weekday + 1 - start_padding;
+									if day > 0 && day <= days_in_month {
+										html! {<td>{day}</td>}
+									} else {
+										html! {<td></td>}
+									}
+								})
+							}
+							</tr>
+						}
+					})
+				}
 				</tbody>
 			</table>
 		</>
