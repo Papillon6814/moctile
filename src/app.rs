@@ -21,7 +21,7 @@ enum Route {
 	Preferences,
 }
 
-fn switch(route: &Route) -> Html {
+fn switch(route: Route) -> Html {
 	match route {
 		Route::Calendar => html! { <Calendar /> },
 		Route::Date => html! { <Date /> },
@@ -33,7 +33,7 @@ fn switch(route: &Route) -> Html {
 pub fn app() -> Html {
 	html! {
 		<BrowserRouter>
-			<Switch<Route> render={Switch::render(switch)} />
+			<Switch<Route> render={switch} />
 		</BrowserRouter>
 	}
 }
