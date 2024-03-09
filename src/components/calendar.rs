@@ -1,4 +1,5 @@
-use yew::{function_component, html, Html, Properties, use_state};
+use yew::*;
+use yew::functional::*;
 use crate::components::menu::Menu;
 use chrono::*;
 
@@ -16,8 +17,6 @@ fn month_view(props: &MonthViewProps) -> Html {
 	let first_weekday = first_day_of_month.weekday();
 	let days_in_month = first_day_of_month.with_month(*month + 1).unwrap().pred_opt().unwrap().day() as i32;
 
-	let mut days: Vec<Html> = Vec::new();
-
 	let weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 	let start_padding = first_weekday.num_days_from_sunday() as i32;
 	let total_slots = days_in_month + start_padding;
@@ -25,7 +24,6 @@ fn month_view(props: &MonthViewProps) -> Html {
 
 	html! {
 		<>
-			<h1>{format!("{} {}", year, month)}</h1>
 			<table>
 				<thead>
 					<tr>
@@ -62,10 +60,33 @@ pub fn calendar() -> Html {
 	let year = use_state(|| Local::now().year());
 	let month = use_state(|| Local::now().month());
 
+	let on_next = use_callback((year.clone(), month.clone()), move |_: MouseEvent, (year, month)| {
+		if **month == 12 {
+			year.set(**year + 1);
+			month.set(1);
+		} else {
+			month.set(**month + 1);
+		}
+	});
+
+	let on_prev = use_callback((year.clone(), month.clone()), move |_: MouseEvent, (year, month)| {
+		if **month == 1 {
+			year.set(**year - 1);
+			month.set(12);
+		} else {
+			month.set(**month - 1);
+		}
+	});
+
 	html! {
 		<div style={"display: flex; margin: 0;"}>
 			<Menu />
 			<main>
+				<div style={"display: flex;"}>
+					<button onclick={on_prev}>{"<"}</button>
+					<h1>{format!("{} {}", *year, *month)}</h1>
+					<button onclick={on_next}>{">"}</button>
+				</div>
 				<MonthView year={*year} month={*month} />
 			</main>
 		</div>
