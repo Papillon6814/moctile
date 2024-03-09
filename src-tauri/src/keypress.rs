@@ -3,13 +3,14 @@ use rdev::EventType::KeyRelease;
 use rusqlite::Connection;
 use crate::models::keypress::increment_keypress_count;
 
-pub fn handle_keypress(conn: Connection, event: Event) {
+pub fn handle_keypress(conn: &Connection, event: Event) {
 	match event.event_type {
 		KeyRelease(key) => {
 			let s = classify_keypress(key);
+			println!("Key released: {:?}", s.clone());
 			increment_keypress_count(conn, s.clone(), 1).unwrap();
 			
-			println!("Key released: {:?}", s);
+			println!("Key released: {:?}", s.clone());
 		},
 		_ => {}
 	}
