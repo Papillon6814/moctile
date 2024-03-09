@@ -1,5 +1,4 @@
 use yew::*;
-use yew::functional::*;
 use crate::components::menu::Menu;
 use chrono::*;
 
@@ -15,7 +14,11 @@ fn month_view(props: &MonthViewProps) -> Html {
 
 	let first_day_of_month = NaiveDate::from_ymd_opt(*year, *month, 1).unwrap();
 	let first_weekday = first_day_of_month.weekday();
-	let days_in_month = first_day_of_month.with_month(*month + 1).unwrap().pred_opt().unwrap().day() as i32;
+	let days_in_month = if *month == 12 {
+        NaiveDate::from_ymd_opt(*year + 1, 1, 1).unwrap().pred_opt().unwrap().day()
+    } else {
+        NaiveDate::from_ymd_opt(*year, *month + 1, 1).unwrap().pred_opt().unwrap().day()
+    } as i32;
 
 	let weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 	let start_padding = first_weekday.num_days_from_sunday() as i32;
