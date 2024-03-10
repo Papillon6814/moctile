@@ -1,7 +1,44 @@
+use std::collections::HashMap;
 use yew::*;
 use crate::components::menu::Menu;
 use crate::constants::colors::BG_BASE;
 use chrono::*;
+use wasm_bindgen::prelude::*;
+use wasm_bindgen_futures::spawn_local;
+use wasm_bindgen::JsCast;
+use serde::{Deserialize, Serialize};
+
+fn convert_jsvalue_to_hashmap(js_value: JsValue) -> Result<HashMap<String, u32>, JsValue> {
+    // JsValueがオブジェクトであることを確認
+    if js_value.is_object() {
+        let js_object = js_sys::Object::from(js_value);
+        let entries = js_sys::Object::entries(&js_object).into_iter();
+        let mut map = HashMap::new();
+
+        for entry in entries {
+            let entry_array: js_sys::Array = entry.dyn_into().unwrap();
+            let key = entry_array.get(0).as_string().unwrap();
+            let value = entry_array.get(1).as_f64().unwrap() as u32; // JavaScriptの数値をRustのu32に変換
+            map.insert(key, value);
+        }
+
+        Ok(map)
+    } else {
+        Err(JsValue::from_str("Input JsValue is not an Object."))
+    }
+}
+
+#[wasm_bindgen(module = "/public/glue.js")]
+extern "C" {
+	#[wasm_bindgen(js_name = readKeyPressesOfMonth, catch)]
+	pub async fn read_keypresses_of_month(year: i32, month: u32) -> Result<JsValue, JsValue>;
+}
+
+#[derive(Serialize, Deserialize)]
+struct UpdateKeyPressInput {
+	year: i32,
+	month: u32,
+}
 
 #[derive(Properties, Clone, PartialEq)]
 struct MonthViewProps {
@@ -9,9 +46,31 @@ struct MonthViewProps {
 	month: u32,
 }
 
+fn update_keypresses(year: i32, month: u32, keypresses: UseStateHandle<HashMap<String, u32>>) {
+	spawn_local(async move {
+		match read_keypresses_of_month(year, month).await {
+			Ok(val) => {
+				let key_presses: HashMap<String, u32> = convert_jsvalue_to_hashmap(val).unwrap();
+				println!("Key presses: {:?}", key_presses);
+				keypresses.set(key_presses);
+			},
+			Err(e) => {
+				let mut hm = HashMap::new();
+				hm.insert(format!("{:?}", e), 1);
+				keypresses.set(hm);
+			}
+		}
+	})
+}
+
 #[function_component(MonthView)]
 fn month_view(props: &MonthViewProps) -> Html {
 	let MonthViewProps { year, month } = props;
+	let keypresses = use_state(|| HashMap::<String, u32>::new());
+
+	use_effect_with((year.clone(), month.clone(), keypresses.clone()), move |(year, month, keypresses)| {
+		update_keypresses(*year, *month, keypresses.clone());
+	});
 
 	let first_day_of_month = NaiveDate::from_ymd_opt(*year, *month, 1).unwrap();
 	let first_weekday = first_day_of_month.weekday();
@@ -46,7 +105,10 @@ fn month_view(props: &MonthViewProps) -> Html {
 								for (0..7).map(|weekday| {
 									let day = week * 7 + weekday + 1 - start_padding;
 									if day > 0 && day <= days_in_month {
-										html! {<td style={date_style}>{day}</td>}
+										let date_key = format!("{}-{:02}-{:02}", *year, *month, day);
+										let v = keypresses.clone();
+                                        let count = v.get(&date_key).unwrap_or(&0);
+                                        html! {<td style={date_style}>{format!("{} ({})", day, count)}</td>}
 									} else {
 										html! {<td style={date_style}></td>}
 									}
