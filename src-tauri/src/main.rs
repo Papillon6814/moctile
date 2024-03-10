@@ -20,6 +20,7 @@ struct DbConn(Arc<Mutex<Connection>>);
 
 #[tauri::command]
 fn read_keypresses_of_month(conn: State<'_, DbConn>, year: i32, month: u32) -> HashMap<String, u32> {
+	println!("Reading keypresses for {}-{}", year, month);
     let conn = conn.0.lock().unwrap();
     let mut counts_map = HashMap::new();
 
