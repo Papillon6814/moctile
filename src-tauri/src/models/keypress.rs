@@ -1,4 +1,5 @@
 use rusqlite::*;
+use chrono::{DateTime, Local};
 
 pub struct KeyPress{
 	id: u16,
@@ -30,15 +31,17 @@ pub fn load_keypress(conn: &Connection, date: String, key_name: String) -> Resul
     Ok(key_press)
 }
 
-pub fn increment_keypress_count(conn: &Connection, key: String, count: u32) -> Result<(), rusqlite::Error> {
-	let timestamp = chrono::Utc::now().timestamp();
-	let mut stmt = (*conn).prepare("
-		INSERT INTO daily_key_presses (date, key_name, count)
-		VALUES ('2024-03-10', 'Space', 1)
-		ON CONFLICT(date, key_name) DO UPDATE SET count = count + 1;
-	")?;
-	stmt.execute(params![key, timestamp])?;
-
-	Ok(())
+pub fn increment_keypress_count(conn: &Connection, key_name: String) -> Result<(), rusqlite::Error> {
+    let formatted_timestamp = format_timestamp_to_ymd(Local::now());
+    conn.execute(
+        "INSERT INTO daily_key_presses (date, key_name, count)
+         VALUES (?1, ?2, 1)
+         ON CONFLICT(date, key_name) DO UPDATE SET count = count + 1;",
+        params![formatted_timestamp, key_name],
+    )?;
+    Ok(())
 }
 
+fn format_timestamp_to_ymd(timestamp: DateTime<Local>) -> String {
+    timestamp.format("%Y-%m-%d").to_string()
+}
