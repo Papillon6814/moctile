@@ -1,7 +1,7 @@
-# Tauri + Yew
+# Moctile
+Open Source Keyboard Input Counter
+<img width="795" alt="image" src="https://github.com/Papillon6814/moctile/assets/41826375/e9443225-d899-4e1a-b508-8a47d3166030">
 
-This template should help get you started developing with Tauri and Yew.
-
-## Recommended IDE Setup
-
-[VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer).
+## Tech Stack
+- Tauri (Yew + Tauri Core)
+- SQLite3
