@@ -1,7 +1,7 @@
 {
   "productName": "moctile",
   "version": "0.0.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "com.papillon6814.moctile",
   "build": {
     "beforeDevCommand": "trunk serve",
     "devUrl": "http://localhost:1420",
