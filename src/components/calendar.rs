@@ -3,9 +3,36 @@ use yew::*;
 use crate::components::menu::Menu;
 use crate::constants::colors::BG_BASE;
 use chrono::*;
+use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
-use tauri_sys::tauri;
+use wasm_bindgen::JsCast;
 use serde::{Deserialize, Serialize};
+
+fn convert_jsvalue_to_hashmap(js_value: JsValue) -> Result<HashMap<String, u32>, JsValue> {
+    // JsValueがオブジェクトであることを確認
+    if js_value.is_object() {
+        let js_object = js_sys::Object::from(js_value);
+        let entries = js_sys::Object::entries(&js_object).into_iter();
+        let mut map = HashMap::new();
+
+        for entry in entries {
+            let entry_array: js_sys::Array = entry.dyn_into().unwrap();
+            let key = entry_array.get(0).as_string().unwrap();
+            let value = entry_array.get(1).as_f64().unwrap() as u32; // JavaScriptの数値をRustのu32に変換
+            map.insert(key, value);
+        }
+
+        Ok(map)
+    } else {
+        Err(JsValue::from_str("Input JsValue is not an Object."))
+    }
+}
+
+#[wasm_bindgen(module = "/public/glue.js")]
+extern "C" {
+	#[wasm_bindgen(js_name = readKeyPressesOfMonth, catch)]
+	pub async fn read_keypresses_of_month(year: i32, month: u32) -> Result<JsValue, JsValue>;
+}
 
 #[derive(Serialize, Deserialize)]
 struct UpdateKeyPressInput {
@@ -21,14 +48,15 @@ struct MonthViewProps {
 
 fn update_keypresses(year: i32, month: u32, keypresses: UseStateHandle<HashMap<String, u32>>) {
 	spawn_local(async move {
-		match tauri::invoke::<_, HashMap<String, u32>>("read_keypresses_of_month", &(year, month)).await {
-			Ok(hm) => {
-				keypresses.set(hm);
+		match read_keypresses_of_month(year, month).await {
+			Ok(val) => {
+				let key_presses: HashMap<String, u32> = convert_jsvalue_to_hashmap(val).unwrap();
+				println!("Key presses: {:?}", key_presses);
+				keypresses.set(key_presses);
 			},
 			Err(e) => {
-				let e = format!("{:?}", e);
 				let mut hm = HashMap::new();
-				hm.insert(e, 0);
+				hm.insert(format!("{:?}", e), 1);
 				keypresses.set(hm);
 			}
 		}
@@ -80,9 +108,7 @@ fn month_view(props: &MonthViewProps) -> Html {
 										let date_key = format!("{}-{:02}-{:02}", *year, *month, day);
 										let v = keypresses.clone();
                                         let count = v.get(&date_key).unwrap_or(&0);
-										let debugstr = format!("{:?}", *v);
-										html! {<div>{debugstr}</div>}
-                                        //html! {<td style={date_style}>{format!("{} ({})", day, count)}</td>}
+                                        html! {<td style={date_style}>{format!("{} ({})", day, count)}</td>}
 									} else {
 										html! {<td style={date_style}></td>}
 									}
