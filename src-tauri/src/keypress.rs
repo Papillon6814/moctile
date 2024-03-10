@@ -7,7 +7,6 @@ pub fn handle_keypress(conn: &Connection, event: Event) {
 	match event.event_type {
 		KeyRelease(key) => {
 			let s = classify_keypress(key);
-			println!("Key released: {:?}", s.clone());
 			increment_keypress_count(conn, s.clone()).unwrap();
 			
 			println!("Key released: {:?}", s.clone());
