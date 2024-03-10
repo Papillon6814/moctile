@@ -27,7 +27,7 @@ fn month_view(props: &MonthViewProps) -> Html {
 	let weeks = (total_slots as f32 / 7.0).ceil() as i32;
 
 	let weekday_style = "font-family: DIN;";
-	let date_style = "width: 40px; height: 40px; text-align: center; font0family: DIN;";
+	let date_style = "width: 40px; height: 40px; text-align: center; font-family: DIN;";
 
 	html! {
 		<>
