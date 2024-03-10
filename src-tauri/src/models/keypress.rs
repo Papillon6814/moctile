@@ -13,7 +13,7 @@ pub fn get_total_key_press_count_for_date(conn: &Connection, date: &str) -> u32 
         "SELECT SUM(count) FROM daily_key_presses WHERE date = ?1",
         params![date],
         |row| row.get(0),
-    ).unwrap_or(0)
+    ).unwrap_or(10)
 }
 
 pub fn load_keypress(conn: &Connection, date: String, key_name: String) -> Result<Option<KeyPress>> {
